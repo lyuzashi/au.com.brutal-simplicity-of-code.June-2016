@@ -48,12 +48,12 @@ class Merged {
 // Example usage of your class.
 // var board = new Merged(6, 6);
 //
+// Two tile domino placed
 // board.makeMove(new Move('1', 0, 0));
-// board.calculateNext();
-//
 // board.makeMove(new Move('1', 1, 0));
 // board.calculateNext();
 //
+// Single tile domino placed
 // board.makeMove(new Move('1', 2, 0));
 // board.calculateNext();
 //
