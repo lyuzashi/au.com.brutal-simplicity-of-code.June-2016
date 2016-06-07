@@ -1,37 +1,85 @@
-class Move {
+export class Move {
   /**
    * @param {string} tile - Valid values are '1', '2', '3', '4', '5', '6', 'M'
    * @param {number} x - The 0 based row for the move.
    * @param {number} y - The 0 based column for the move.
    */
-  function constructor(tile, x, y) {
-    this.tile = tile;
-    this.x = x;
-    this.y = y;
+  constructor(tile, x, y) {
+    Object.assign(this, {tile, x, y});
   }
+
+  placeOnGame(game) {
+    Object.assign(this, {game});
+    this.game.board[this.x][this.y] = this;
+    this.game.moves.push(this);
+  }
+
+  getAbove() {
+    if(this.y > 0) return this.game.board[this.x][this.y - 1];
+  }
+
+  getBelow() {
+    if(this.y < this.game.height - 1) return this.game.board[this.x][this.y + 1];
+  }
+
+  getLeft() {
+    if(this.x > 0) return this.game.board[this.x - 1][this.y];
+  }
+
+  getRight() {
+    if(this.x < this.game.width - 1) return this.game.board[this.x + 1][this.y];
+  }
+
+  getAdjacent() {
+    return [this.getAbove(), this.getBelow(), this.getLeft(), this.getRight()].filter( m => m );
+  }
+
+  getAdjacentSame() {
+    return this.getAdjacent().filter( m => m.tile === this.tile );
+  }
+
+  getChain(chain = new Set){
+    const adjacent = this.getAdjacentSame();
+    adjacent.forEach( sibling => {
+      chain.add(sibling)
+      if( !chain.has(sibling) ) sibling.getChain(chain);
+      chain.add()
+    });
+    
+    return chain;
+  }
+
+  toString() {
+    return this.tile;
+  }
+
 }
 
-class Merged {
+export class Merged {
   /**
    * Do whatever you need to do here to prep.
    */
-  function constructor(width, height) {
-
+  constructor(width, height) {
+    Object.assign(this, {width, height});
+    this.clearBoard();
   }
 
   /**
    * This function will be used by my tests to reset the board.
    */
-  function clearBoard() {
-
+  clearBoard() {
+    this.board = Array(this.width).fill().map( row => Array(this.height).fill() );
+    this.moves = [];
   }
 
   /**
    * Make a move
    * @param {Move[]} move - One or two tiles that will be played in this move.
    */
-  function makeMove(move) {
-
+  makeMove(move) {
+    if(this.board[move.x][move.y]) throw new Error('Selected position is taken on the board');
+    move.placeOnGame(this);
+    return move;
   }
 
   /**
@@ -40,10 +88,12 @@ class Merged {
    * and return it as a convenience for my tests to know what just happened.
    * @return {number[][]}
    */
-  function calculateNext() {
-
+  calculateNext() {
+    return this.board;
   }
+
 }
+
 
 // Example usage of your class.
 // var board = new Merged(6, 6);
