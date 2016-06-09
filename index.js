@@ -13,7 +13,6 @@ class MergedCLI extends Merged {
    * A reasonable board size
    */
   static reasonableRandom() {
-    return 5;
     return Math.floor(Math.random() * 18) + 3;
   }
 
@@ -39,26 +38,22 @@ class MergedCLI extends Merged {
   }
 
   calculateNext() {
+    console.log(this.toString());
     super.calculateNext(...arguments);
     console.log(this.toString());
   }
 
 }
 
-var board = new MergedCLI.generateRandomBoard();
-
+// Example usage of your class.
+var board = new MergedCLI(6, 6);
 
 // Two tile domino placed
-board.makeMove(new Move('1', 0, 0));
-board.makeMove(new Move('1', 1, 0));
+board.makeMoves([new Move('1', 0, 0), new Move('1', 1, 0)]);
 board.calculateNext();
-
 
 // Single tile domino placed
-let m = board.makeMove(new Move('1', 1, 1));
-console.log(m.getAdjacentSame())
+board.makeMoves([new Move('1', 2, 0)]);
 board.calculateNext();
-//
-
 
 board.clearBoard();
