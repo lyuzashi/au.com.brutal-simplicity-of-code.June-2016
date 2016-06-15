@@ -543,7 +543,7 @@ describe(`Given the Merged library`, () => {
     });
     it(`then the tiles should merge when forming multiple sets of three`, () => {
       board.makeMoves([new Move(`3`, 0, 1), new Move(`1`, 1, 1)]);
-      board.calculateNext()
+      board.calculateNext();
       board.makeMoves([new Move(`1`, 1, 2), new Move(`3`, 0, 2)]);
       expect(`${board.calculateNext()}`).to.equal(`${new EndGame(
         [_,_,_,_,_],
@@ -554,7 +554,7 @@ describe(`Given the Merged library`, () => {
     });
     it(`then each tile should merge and then chain one after the other in ascending order`, () => {
       board.makeMoves([new Move(`2`, 1, 1)]);
-      board.calculateNext()
+      board.calculateNext();
       board.makeMoves([new Move(`1`, 3, 0), new Move(`2`, 3, 1)]);
       expect(`${board.calculateNext()}`).to.equal(`${new EndGame(
         [3,1,_,1,_],
@@ -569,6 +569,26 @@ describe(`Given the Merged library`, () => {
         [_,_,_,_,_],
         [_,_,_,_,_],
         [_,_,_,_,_])}`);
+    });
+  });
+
+  describe(`when the example is played`, () => {
+    const width = 3, height = 4;
+    let board;
+    beforeEach(() => {
+      board = new Merged(width, height);
+      board.makeMoves([new Move(`1`, 0, 0), new Move(`1`, 1, 0)]);
+      board.calculateNext();
+      board.makeMoves([new Move(`2`, 0, 1), new Move(`2`, 0, 2)]);
+      board.calculateNext();
+    });
+    it(`then it should reduce to this`, () => {
+      board.makeMoves([new Move(`1`, 1, 1)]);
+      expect(`${board.calculateNext()}`).to.equal(`${new EndGame(
+        [_,_,_],
+        [_,3,_],
+        [_,_,_],
+        [_,_,_])}`);
     });
   });
 
