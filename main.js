@@ -12,7 +12,7 @@ class Chain extends Set {
    * Looks like a Set (species), quacks like a Set (inherits all methods), but it's a Chain!
    * The "well-known" Symbol species indicates the constructor this class will masquarade.
    */
-  static get [Symbol.species]() { return Set }
+  static get [Symbol.species]() { return Set; }
 
   get length() {
     return this.size;
@@ -22,25 +22,25 @@ class Chain extends Set {
 
 /**
  * Another Set, this time as a holding-ground for moves before calculateNext is called.
- * Each move should be chained from here in order of lowest tiles to highest. They can then be 
+ * Each move should be chained from here in order of lowest tiles to highest. They can then be
  * deleted. Moves that are created by merges also pass through here – thus unlimited chain
  * reactions can be performed.
  *
- * The key reason for doing this is to avoid evaulating chains of matching Pieces across all that 
+ * The key reason for doing this is to avoid evaulating chains of matching Pieces across all that
  * are on the board, or worse still, assessing every space on the board.
  */
 class Moves extends Set {
 
-  static get [Symbol.species]() { return Set }
+  static get [Symbol.species]() { return Set; }
 
   /**
    * Override Set's forEach with a call to forEach on an array cast version of this set, sorted.
    * Since a Move provides the primative string of it's tile, sort will order these correctly.
    * Reverse is used to start backwards from the last move made if two of the same tile are in.
    */
-  forEach(){
-    let array = [...this].reverse().sort();
-    return array.forEach.apply(array, arguments);
+  forEach(...args) {
+    const array = [...this].reverse().sort();
+    return array.forEach.apply(array, args);
   }
 
 }
@@ -69,20 +69,20 @@ class Piece extends Move {
 
   // Yay class properties! Wouldn't mind extending the primative tiles array to aid in upgrade()
   static minimumMerge = 3;
-  static tiles = ['1', '2', '3', '4', '5', '6', 'M'];
+  static tiles = [`1`, `2`, `3`, `4`, `5`, `6`, `M`];
 
   /**
    * @param {string|Move} tile - construct from Move or with Move-like parameters
    * @param {number} x
    * @param {number} y
    */
-  constructor(tile, x, y) {
-    super(...arguments)
-    if( arguments[0] instanceof Move ) {
-      Object.assign(this, {tile, x, y} = arguments[0]);
+  constructor(move, ...args) {
+    super(move, ...args);
+    if (move instanceof Move) {
+      Object.assign(this, move);
     }
     // Probably slows it down, but a little validation doesn't go astray
-    if( Piece.tiles.indexOf( this.tile ) === -1 ) throw new Error('Invalid tile');
+    if (Piece.tiles.indexOf(this.tile) === -1) throw new Error(`Invalid tile`);
   }
 
   /**
@@ -90,9 +90,9 @@ class Piece extends Move {
    * @param {Merged} game
    */
   placeOnGame(game) {
-    if(game) Object.assign(this, {game});
+    if (game) Object.assign(this, { game });
     // Someone's got to check this...
-    if(this.game.board[this.x][this.y]) throw new Error('Selected position is taken on the board');
+    if (this.game.board[this.x][this.y]) throw new Error(`Selected position is taken on the board`);
     this.game.board[this.x][this.y] = this;
     // New moves get passed through the Moves set so chains can be found on relevant pieces rather
     // than searching the entire board.
@@ -112,60 +112,60 @@ class Piece extends Move {
    * BOOM! Nothing left to merge, go out with a bang and remove surrounding Pieces.
    */
   explode() {
-    this.getSurrounding().forEach( piece => piece.removeFromGame() );
+    this.getSurrounding().forEach(piece => piece.removeFromGame());
     this.removeFromGame();
   }
 
   /**
    * Take the tile up a level. At the highest? Explode!
    */
-  upgrade(){
+  upgrade() {
     this.tile = Piece.tiles[Piece.tiles.indexOf(this.tile) + 1];
-    if(!this.tile) this.explode();
+    if (!this.tile) this.explode();
   }
 
   // These functions grab surrounding tiles to check for chains
 
   getAbove() {
-    if(this.y > 0) return this.game.board[this.x][this.y - 1];
+    return this.y > 0 && this.game.board[this.x][this.y - 1];
   }
 
   getBelow() {
-    if(this.y < this.game.height - 1) return this.game.board[this.x][this.y + 1];
+    return this.y < this.game.height - 1 && this.game.board[this.x][this.y + 1];
   }
 
   getLeft() {
-    if(this.x > 0) return this.game.board[this.x - 1][this.y];
+    return this.x > 0 && this.game.board[this.x - 1][this.y];
   }
 
   getRight() {
-    if(this.x < this.game.width - 1) return this.game.board[this.x + 1][this.y];
+    return this.x < this.game.width - 1 && this.game.board[this.x + 1][this.y];
   }
 
   // Diagonals for explosion
 
   getAboveLeft() {
-    if(this.y > 0 && this.x > 0) return this.game.board[this.x - 1][this.y - 1];
+    return this.y > 0 && this.x > 0 && this.game.board[this.x - 1][this.y - 1];
   }
 
   getAboveRight() {
-    if(this.y > 0 && this.x < this.game.width - 1) return this.game.board[this.x + 1][this.y - 1];
+    return this.y > 0 && this.x < this.game.width - 1 && this.game.board[this.x + 1][this.y - 1];
   }
 
   getBelowLeft() {
-    if(this.x > 0 && this.y < this.game.height - 1) return this.game.board[this.x - 1][this.y + 1];
+    return this.x > 0 && this.y < this.game.height - 1 && this.game.board[this.x - 1][this.y + 1];
   }
 
   getBelowRight() {
-    if(this.x < this.game.width - 1 && this.y < this.game.height - 1) 
-      return this.game.board[this.x + 1][this.y + 1];
+    return this.x < this.game.width - 1 && this.y < this.game.height - 1 &&
+      this.game.board[this.x + 1][this.y + 1];
   }
 
   /**
    * Lump all neighbours together, ignoring empty spaces.
    */
   getAdjacent() {
-    return [this.getAbove(), this.getBelow(), this.getLeft(), this.getRight()].filter( m => m );
+    return [this.getAbove(), this.getBelow(), this.getLeft(), this.getRight()].filter(m => m);
   }
 
   /**
@@ -173,14 +173,14 @@ class Piece extends Move {
    */
   getSurrounding() {
     return [...this.getAdjacent(), this.getAboveLeft(), this.getAboveRight(), this.getBelowLeft(),
-      this.getBelowRight()].filter( m => m );
+      this.getBelowRight()].filter(m => m);
   }
 
   /**
    * Filter out adjacent Pieces that don't have the same tile
    */
   getAdjacentSame() {
-    return this.getAdjacent().filter( m => m.tile === this.tile );
+    return this.getAdjacent().filter(m => m.tile === this.tile);
   }
 
   /**
@@ -188,11 +188,11 @@ class Piece extends Move {
    * Takes advantage of Set to ignore duplicates and avoid double-checking.
    * Uses recursion to collect neighbours-of-neighbours... Chains to the edges of space itself!
    */
-  getChain(chain = new Chain){
+  getChain(chain = new Chain) {
     const adjacent = this.getAdjacentSame();
     chain.add(this);
-    adjacent.forEach( sibling => {
-      if( !chain.has(sibling) ) sibling.getChain(chain);
+    adjacent.forEach(sibling => {
+      if (!chain.has(sibling)) sibling.getChain(chain);
     });
     return chain;
   }
@@ -201,16 +201,16 @@ class Piece extends Move {
    * Another deceptively simple method. Performs a merge to this piece if applicable.
    * Using the chains of pieces found above, the siblings get removed and the current piece gets an
    * upgrade before being replaced on the board.
-   * 
+   *
    * Since placing a piece on the board adds it to the Moves Set, merge can be continually called
    * until the Set is empty – thus performing domino effect merges.
    */
   merge() {
     const chain = this.getChain();
-    if(chain.size >= Piece.minimumMerge) {
-      chain.forEach( piece => piece.removeFromGame() );
+    if (chain.size >= Piece.minimumMerge) {
+      chain.forEach(piece => piece.removeFromGame());
       this.upgrade();
-      if(this.tile) this.placeOnGame();
+      if (this.tile) this.placeOnGame();
     }
   }
 
@@ -232,17 +232,17 @@ export class Merged {
    * Do whatever you need to do here to prep.
    */
   constructor(width, height) {
-    Object.assign(this, {width, height});
+    Object.assign(this, { width, height });
     this.clearBoard();
   }
 
   /**
    * This function will be used by my tests to reset the board.
-   * And also to construct the board first time! Arrays for dayz. Fill will pad them out with 
+   * And also to construct the board first time! Arrays for dayz. Fill will pad them out with
    * undefined, so there's a nice expanse of empty space to play!
    */
   clearBoard() {
-    this.board = Array(this.width).fill().map( row => Array(this.height).fill() );
+    this.board = Array(this.width).fill().map(() => Array(this.height).fill());
   }
 
   /**
@@ -258,7 +258,7 @@ export class Merged {
 
     // Moves are turned into pieces, which can be placed on the game board.
     new Piece(moves[0]).placeOnGame(this);
-    if(moves.length > 1) new Piece(moves[1]).placeOnGame(this);
+    if (moves.length > 1) new Piece(moves[1]).placeOnGame(this);
   }
 
   /**
@@ -274,11 +274,11 @@ export class Merged {
    */
   calculateNext() {
     do {
-      this.moves.forEach( move => {
-        this.moves.delete( move );
+      this.moves.forEach(move => {
+        this.moves.delete(move);
         move.merge();
       });
-    } while ( this.moves.size > 0 );
+    } while (this.moves.size > 0);
     return this.board;
   }
 

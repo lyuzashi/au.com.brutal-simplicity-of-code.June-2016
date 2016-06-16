@@ -1,0 +1,24 @@
+{
+  "parser": "babel-eslint",
+  "extends": "airbnb",
+  "env": {
+    "browser": false,
+    "es6": true,
+    "mocha": true,
+    "node": true
+  },
+  "ecmaFeatures": {
+    "defaultParams": true
+  },
+  "rules": {
+    "comma-dangle": 0,
+    "func-names": 0,
+    "indent": [2, 2, { "SwitchCase": 1 }],
+    "new-cap": 0,
+    "no-lone-blocks": 0,
+    "no-unused-expressions": 0,
+    "prefer-arrow-callback": 0,
+    "quotes": [2, "backtick", "avoid-escape"],
+    "space-infix-ops": 0
+  }
+}
